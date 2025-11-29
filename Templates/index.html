@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Lecture Summarizer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Adaptive Lecture Summarizer</h1>
+        <p class="subtitle">Paste lecture transcript and get a personalized summary based on your knowledge level</p>
+        
+        <div class="note">
+            <strong>Prototype v1:</strong> Currently using text input. Audio/video upload coming soon!
+        </div>
+        
+        <div class="input-section">
+            <label for="transcriptInput">Lecture Transcript</label>
+            <textarea id="transcriptInput" placeholder="Paste your lecture transcript here..."></textarea>
+            <a class="example-link" onclick="loadExample()">Load example transcript</a>
+        </div>
+        
+        <div class="slider-section">
+            <label>Your Knowledge Level</label>
+            <div class="slider-container">
+                <input type="range" id="knowledgeSlider" min="0" max="100" value="30" />
+                <div class="knowledge-value">
+                    <span id="knowledgeValue">0.3</span> - <span id="knowledgeLabel">Beginner</span>
+                </div>
+                <div class="slider-labels">
+                    <span>Complete Beginner</span>
+                    <span>Intermediate</span>
+                    <span>Expert</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="processBtn" onclick="processSummary()">Generate Summary</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating your personalized summary...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <div class="result-header">
+                <h2>📝 Your Personalized Summary</h2>
+                <div class="knowledge-badge" id="knowledgeBadge"></div>
+            </div>
+            <div id="resultContent"></div>
+            
+            <button class="quiz-trigger-btn" id="quizTriggerBtn" onclick="startQuiz()">
+                🧠 Test Your Understanding
+            </button>
+        </div>
+        
+        <div class="quiz-container" id="quizContainer">
+            <h2>📋 Knowledge Check</h2>
+            <p class="quiz-intro">Answer these questions in your own words to test your understanding.</p>
+            
+            <div id="quizContent"></div>
+            
+            <button class="back-to-summary-btn" onclick="backToSummary()">← Back to Summary</button>
+        </div>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
