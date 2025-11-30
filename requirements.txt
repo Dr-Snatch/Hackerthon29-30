@@ -1,0 +1,33 @@
+# Adaptive Lecture Summarizer - Python Dependencies
+# ================================================
+
+# Core Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+python-dotenv==1.0.0
+jinja2==3.1.2
+
+# AI/ML APIs
+anthropic>=0.75.0
+openai>=2.8.1
+
+# File Handling
+python-multipart==0.0.6
+
+# PDF Processing
+PyPDF2==3.0.1
+
+# Office Documents Processing
+python-docx==1.1.0  # For DOCX files
+python-pptx==0.6.23  # For PPTX files
+
+# Audio Processing
+pydub==0.25.1
+
+# Audio Transcription - Local Whisper (Python 3.13)
+openai-whisper
+torch
+torchaudio
+
+# Note: FFmpeg required for audio processing
+# Install with: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux)

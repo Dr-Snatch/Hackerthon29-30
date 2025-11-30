@@ -1,72 +1,292 @@
 <!DOCTYPE html>
+<!--
+Adaptive Lecture Summarizer - Frontend HTML
+============================================
+
+Project: Adaptive learning platform with personalized summaries and quizzes
+File: templates/index.html
+Purpose: Main user interface structure
+
+Features:
+- Lecture transcript input area
+- Knowledge level slider (5 levels: Complete Beginner to Expert)
+- Real-time streaming summary display
+- Interactive natural language quiz interface
+- Responsive design with clean UI
+
+Components:
+- Transcript input textarea
+- Knowledge level slider with visual feedback
+- Generate Summary button
+- Streaming results display
+- Quiz interface with natural language answers
+- Feedback display system
+
+Dependencies:
+- /static/styles.css: All styling
+- /static/script.js: All JavaScript functionality
+
+Author: Hackathon Team
+Date: November 2025
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adaptive Lecture Summarizer</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css?v=7">
 </head>
 <body>
-    <div class="container">
-        <h1>🎓 Adaptive Lecture Summarizer</h1>
-        <p class="subtitle">Paste lecture transcript and get a personalized summary based on your knowledge level</p>
-        
-        <div class="note">
-            <strong>Prototype v1:</strong> Currently using text input. Audio/video upload coming soon!
-        </div>
-        
-        <div class="input-section">
-            <label for="transcriptInput">Lecture Transcript</label>
-            <textarea id="transcriptInput" placeholder="Paste your lecture transcript here..."></textarea>
-            <a class="example-link" onclick="loadExample()">Load example transcript</a>
-        </div>
-        
-        <div class="slider-section">
-            <label>Your Knowledge Level</label>
-            <div class="slider-container">
-                <input type="range" id="knowledgeSlider" min="0" max="100" value="30" />
-                <div class="knowledge-value">
-                    <span id="knowledgeValue">0.3</span> - <span id="knowledgeLabel">Beginner</span>
+    <div class="language-selector">
+        <label for="languageSelect">🌐</label>
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+            <option value="ar">العربية</option>
+            <option value="hi">हिन्दी</option>
+            <option value="pt">Português</option>
+            <option value="ru">Русский</option>
+        </select>
+    </div>
+
+    <div class="app-wrapper">
+        <header>
+            <div class="logo-area">
+                <span class="logo-icon">🎓</span>
+                <h1>Lecture<span class="highlight">Mate</span></h1>
+            </div>
+            <p class="subtitle">Transform complex lectures into personalized summaries tailored to your expertise.</p>
+        </header>
+
+        <main class="container">
+            <div class="card input-card">
+                <div class="card-header">
+                    <label for="transcriptInput">Lecture Content</label>
+                    <button class="text-btn" onclick="loadExample()">
+                        <span>📋</span> Load Example
+                    </button>
                 </div>
+
+                <!-- File Upload Tabs -->
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-tabs">
+                        <button class="upload-tab active" data-input="text" onclick="switchInputMode('text')">
+                            <span>✍️</span> Text Input
+                        </button>
+                        <button class="upload-tab" data-input="pdf" onclick="switchInputMode('pdf')">
+                            <span>📁</span> Upload Files
+                        </button>
+                        <button class="upload-tab" data-input="audio" onclick="switchInputMode('audio')">
+                            <span>🎤</span> Upload Audio
+                        </button>
+                    </div>
+
+                    <!-- Text Input Mode (existing) -->
+                    <div class="input-mode" id="textInputMode">
+                        <div class="textarea-wrapper">
+                            <textarea id="transcriptInput" placeholder="Paste your lecture text here..."></textarea>
+                            <button class="save-file-btn" onclick="saveTextToMemory()" title="Save to memory bank">
+                                💾 Save to Memory
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload Mode -->
+                    <div class="input-mode hidden" id="pdfInputMode">
+                        <div class="dropzone" id="pdfDropzone">
+                            <input type="file" id="pdfFileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" style="display: none;" onchange="handlePDFUpload(event)">
+                            <div class="dropzone-content">
+                                <span class="dropzone-icon">📁</span>
+                                <p class="dropzone-text">Drag & drop files here or click to browse</p>
+                                <p class="dropzone-hint">Supported: PDF, Word (.doc/.docx), PowerPoint (.ppt/.pptx), Text (Max: <span id="maxPdfSize">50MB</span>)</p>
+                                <button type="button" class="browse-btn" onclick="document.getElementById('pdfFileInput').click()">
+                                    Choose File
+                                </button>
+                            </div>
+                        </div>
+                        <div class="upload-progress hidden" id="pdfProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="pdfProgressFill"></div>
+                            </div>
+                            <p class="progress-text" id="pdfProgressText">Uploading...</p>
+                        </div>
+                        <div class="file-preview hidden" id="pdfPreview">
+                            <div class="preview-header">
+                                <span class="preview-icon">📄</span>
+                                <span class="preview-filename" id="pdfFilename"></span>
+                                <div class="preview-actions">
+                                    <button class="download-file-btn" onclick="savePDFToMemory()" title="Save to memory bank">
+                                        💾 Save to Memory
+                                    </button>
+                                    <button class="remove-file-btn" onclick="clearFileUpload('pdf')">✕</button>
+                                </div>
+                            </div>
+                            <div class="preview-content" id="pdfPreviewContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Upload Mode -->
+                    <div class="input-mode hidden" id="audioInputMode">
+                        <div class="dropzone" id="audioDropzone">
+                            <input type="file" id="audioFileInput" accept=".mp3,.wav,.m4a" style="display: none;" onchange="handleAudioUpload(event)">
+                            <div class="dropzone-content">
+                                <span class="dropzone-icon">🎤</span>
+                                <p class="dropzone-text">Drag & drop audio here or click to browse</p>
+                                <p class="dropzone-hint">Supported formats: MP3, WAV, M4A (Max: <span id="maxAudioSize">200MB</span>)</p>
+                                <button type="button" class="browse-btn" onclick="document.getElementById('audioFileInput').click()">
+                                    Choose File
+                                </button>
+                            </div>
+                        </div>
+                        <div class="file-selected hidden" id="audioFileSelected">
+                            <div class="preview-header">
+                                <span class="preview-icon">🎤</span>
+                                <span class="preview-filename" id="audioFilenameSelected"></span>
+                                <button class="remove-file-btn" onclick="clearAudioSelection()">✕</button>
+                            </div>
+                            <button class="transcribe-btn" onclick="startTranscription()">
+                                🎙️ Start Transcription
+                            </button>
+                        </div>
+                        <div class="upload-progress hidden" id="audioProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="audioProgressFill"></div>
+                            </div>
+                            <p class="progress-text" id="audioProgressText">Transcribing...</p>
+                        </div>
+                        <div class="file-preview hidden" id="audioPreview">
+                            <div class="preview-header">
+                                <span class="preview-icon">🎤</span>
+                                <span class="preview-filename" id="audioFilename"></span>
+                                <div class="preview-actions">
+                                    <button class="download-file-btn" onclick="saveAudioToMemory()" title="Save to memory bank">
+                                        💾 Save to Memory
+                                    </button>
+                                    <button class="remove-file-btn" onclick="clearFileUpload('audio')">✕</button>
+                                </div>
+                            </div>
+                            <div class="preview-content" id="audioPreviewContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memory Bank Panel - Integrated -->
+                <div class="memory-panel-integrated" id="memoryPanel" style="display:none;">
+                    <div class="memory-header">
+                        <h3>📚 Memory Bank</h3>
+                        <div class="memory-actions">
+                            <span class="source-count" id="sourceCount">0 sources</span>
+                            <button class="clear-all-btn" onclick="clearMemory()" title="Clear all sources">
+                                🗑️ Clear All
+                            </button>
+                        </div>
+                    </div>
+                    <div id="memorySourcesList" class="sources-list">
+                        <p class="empty-memory">No sources added yet. Add text, PDF, or audio to build your lecture.</p>
+                    </div>
+                </div>
+
+                <div class="note-badge">
+                    <span>💡</span> <strong>Tip:</strong> Save multiple sources to memory to create a comprehensive summary from all your content
+                </div>
+            </div>
+
+            <div class="card controls-card">
+                <div class="slider-header">
+                    <label>Knowledge Level</label>
+                    <span class="knowledge-badge" id="knowledgeBadgeTop">Beginner</span>
+                </div>
+                
+                <div class="slider-container">
+                    <input type="range" id="knowledgeSlider" min="0" max="100" value="30" />
+                </div>
+                
                 <div class="slider-labels">
-                    <span>Complete Beginner</span>
-                    <span>Intermediate</span>
-                    <span>Expert</span>
+                    <span class="label-left"><strong>Beginner</strong></span>
+                    <span class="label-right"><strong>Expert</strong></span>
+                </div>
+                
+                <span id="knowledgeLabel" style="display:none;">Beginner</span>
+
+                <button id="processBtn" onclick="handleGenerateSummary()" class="primary-btn">
+                    <span class="btn-icon">✨</span> Generate Summary
+                </button>
+
+                <div class="divider-text">or</div>
+
+                <button onclick="toggleQA()" class="secondary-btn">
+                    <span class="icon">💬</span> Ask Questions About This Lecture
+                </button>
+            </div>
+
+            <div class="qa-section" id="qaSection">
+                <h3>Ask a Question</h3>
+                <p class="qa-intro">Get instant answers about the lecture content, tailored to your knowledge level.</p>
+                
+                <div class="qa-input-group">
+                    <textarea id="questionInput" placeholder="What would you like to know about this lecture?" rows="3"></textarea>
+                    <button onclick="askQuestion()" class="primary-btn" id="askBtn">
+                        <span>💡</span> Get Answer
+                    </button>
+                </div>
+                
+                <div id="qaHistory"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loader-dots">
+                    <div></div><div></div><div></div>
+                </div>
+                <p>Analyzing text & crafting summary...</p>
+            </div>
+
+            <div class="error-banner" id="error"></div>
+
+            <div class="result-area" id="result">
+                <div class="section-divider">
+                    <span>Your Summary</span>
+                </div>
+                
+                <div class="result-header-badge">
+                    <span class="knowledge-badge" id="knowledgeBadge"></span>
+                </div>
+                
+                <div id="resultContent" class="markdown-body"></div>
+                
+                <div class="action-footer">
+                    <button class="secondary-btn quiz-trigger" id="quizTriggerBtn" onclick="startQuiz()">
+                        <span class="icon">🧠</span> Test Your Understanding
+                    </button>
                 </div>
             </div>
-        </div>
-        
-        <button id="processBtn" onclick="processSummary()">Generate Summary</button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Generating your personalized summary...</p>
-        </div>
-        
-        <div class="error" id="error"></div>
-        
-        <div class="result" id="result">
-            <div class="result-header">
-                <h2>📝 Your Personalized Summary</h2>
-                <div class="knowledge-badge" id="knowledgeBadge"></div>
+
+            <div class="quiz-container" id="quizContainer">
+                <div class="quiz-header">
+                    <h2>Knowledge Check</h2>
+                    <button class="icon-btn" onclick="backToSummary()" title="Close Quiz">✕</button>
+                </div>
+                <p class="quiz-intro">Validate your learning with these personalized questions.</p>
+                
+                <div id="quizContent"></div>
+                
+                <button class="text-btn back-btn" onclick="backToSummary()">
+                    ← Back to Summary
+                </button>
             </div>
-            <div id="resultContent"></div>
-            
-            <button class="quiz-trigger-btn" id="quizTriggerBtn" onclick="startQuiz()">
-                🧠 Test Your Understanding
-            </button>
-        </div>
+        </main>
         
-        <div class="quiz-container" id="quizContainer">
-            <h2>📋 Knowledge Check</h2>
-            <p class="quiz-intro">Answer these questions in your own words to test your understanding.</p>
-            
-            <div id="quizContent"></div>
-            
-            <button class="back-to-summary-btn" onclick="backToSummary()">← Back to Summary</button>
-        </div>
+        <footer>
+            <p>Powered by AI • Built for Hackathon Nov 2025</p>
+        </footer>
     </div>
     
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js?v=9"></script>
 </body>
 </html>
